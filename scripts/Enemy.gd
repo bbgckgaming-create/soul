@@ -1,5 +1,6 @@
 ## Enemy.gd
 ## CPU-controlled fighter with simple state-based AI.
+class_name Enemy
 extends Fighter
 
 var player: Fighter = null

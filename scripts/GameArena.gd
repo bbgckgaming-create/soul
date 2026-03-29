@@ -111,7 +111,7 @@ func _build_fighters() -> void:
 func _create_fighter(is_player: bool) -> Fighter:
 	var fighter: Fighter
 	if is_player:
-		fighter = Player.new()
+		fighter = load("res://scenes/player.tscn").instantiate()
 	else:
 		fighter = Enemy.new()
 

@@ -1,6 +1,7 @@
 ## Player.gd
 ## Human-controlled fighter. Reads input from VirtualJoystick and action buttons.
 ## Also supports keyboard input for desktop testing.
+class_name Player
 extends Fighter
 
 # Input state set by VirtualJoystick and ActionButtons
