@@ -1,5 +1,6 @@
 ## VirtualJoystick.gd
 ## On-screen analog stick for mobile touch input.
+class_name VirtualJoystick
 extends Control
 
 signal direction_changed(direction: Vector2)

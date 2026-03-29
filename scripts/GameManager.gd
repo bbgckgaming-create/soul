@@ -1,5 +1,6 @@
 ## GameManager.gd
 ## Autoloaded singleton — manages global game state, rounds, and signals.
+class_name GameManager
 extends Node
 
 # ─── Signals ────────────────────────────────────────────────────────────────

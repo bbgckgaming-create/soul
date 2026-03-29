@@ -1,5 +1,6 @@
 ## HUD.gd
 ## Heads-up display: health bars, special meters, round info, result text.
+class_name HUD
 extends CanvasLayer
 
 # ─── Node References ──────────────────────────────────────────────────────────
