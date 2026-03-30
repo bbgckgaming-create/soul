@@ -35,7 +35,7 @@ func _ready() -> void:
 	vp      = get_viewport().get_visible_rect().size
 	if vp == Vector2.ZERO:
 		vp = Vector2(720, 1280)
-	floor_y = vp.y - 160.0
+	floor_y = vp.y - 300.0
 
 	GameManager.start_game()
 
@@ -247,6 +247,8 @@ func _make_button(label_text: String, color: Color, pos: Vector2, sz: Vector2, p
 	btn.position  = pos
 	btn.size      = sz
 	btn.text      = label_text
+	# Pivot at center so scale animation shrinks inward
+	btn.pivot_offset = sz * 0.5
 
 	var normal := StyleBoxFlat.new()
 	normal.bg_color                        = Color(color.r, color.g, color.b, 0.75)
@@ -257,18 +259,33 @@ func _make_button(label_text: String, color: Color, pos: Vector2, sz: Vector2, p
 	normal.border_color = Color(1, 1, 1, 0.35)
 	normal.set_border_width_all(2)
 
-	var pressed := StyleBoxFlat.new()
-	pressed.bg_color                       = Color(color.r * 1.3, color.g * 1.3, color.b * 1.3, 0.95)
-	pressed.corner_radius_top_left         = int(sz.x * 0.5)
-	pressed.corner_radius_top_right        = int(sz.x * 0.5)
-	pressed.corner_radius_bottom_left      = int(sz.x * 0.5)
-	pressed.corner_radius_bottom_right     = int(sz.x * 0.5)
+	var pressed_style := StyleBoxFlat.new()
+	pressed_style.bg_color                     = Color(1.0, 1.0, 1.0, 0.95)
+	pressed_style.corner_radius_top_left       = int(sz.x * 0.5)
+	pressed_style.corner_radius_top_right      = int(sz.x * 0.5)
+	pressed_style.corner_radius_bottom_left    = int(sz.x * 0.5)
+	pressed_style.corner_radius_bottom_right   = int(sz.x * 0.5)
+	pressed_style.border_color = color
+	pressed_style.set_border_width_all(4)
 
 	btn.add_theme_stylebox_override("normal",    normal)
-	btn.add_theme_stylebox_override("pressed",   pressed)
+	btn.add_theme_stylebox_override("pressed",   pressed_style)
 	btn.add_theme_stylebox_override("hover",     normal)
 	btn.add_theme_font_size_override("font_size", 22)
-	btn.add_theme_color_override("font_color",   Color.WHITE)
+	btn.add_theme_color_override("font_color",         Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  color)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+
+	# Scale-bounce animation on press and release
+	btn.button_down.connect(func():
+		var tw := btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(0.85, 0.85), 0.07).set_ease(Tween.EASE_OUT)
+	)
+	btn.button_up.connect(func():
+		var tw := btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(1.1, 1.1), 0.08).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.08).set_ease(Tween.EASE_IN)
+	)
 
 	parent.add_child(btn)
 	return btn

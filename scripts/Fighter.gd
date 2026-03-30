@@ -58,8 +58,8 @@ var hurtbox_area:  Area2D    = null
 var attack_shape:  CollisionShape2D = null
 
 # ─── Character visual dimensions ─────────────────────────────────────────────
-const CHAR_W: float = 54.0
-const CHAR_H: float = 108.0
+const CHAR_W: float = 72.0
+const CHAR_H: float = 144.0
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
