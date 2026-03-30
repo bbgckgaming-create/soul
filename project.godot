@@ -17,7 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Soul Fracture"
 config/description="A 2D mobile fighting game for Android."
 run/main_scene="res://scenes/GameArena.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]
 
@@ -66,15 +66,4 @@ jump={
 }
 crouch={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":83,"physical_keycode":0,"key_label":0,"unicode":115,"location":0,"echo":false,"script":null)
-]
-}
-
-[physics]
-
-2d/default_gravity=1200
-
-[rendering]
-
-textures/canvas_textures/default_texture_filter=0
-renderer/rendering_method="mobile"
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":f

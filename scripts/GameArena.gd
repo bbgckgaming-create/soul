@@ -29,7 +29,12 @@ var game_over_pending: bool = false
 
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	vp      = get_viewport_rect().size
+	# Wait one frame so the viewport is fully initialized before reading its size
+	await get_tree().process_frame
+
+	vp      = get_viewport().get_visible_rect().size
+	if vp == Vector2.ZERO:
+		vp = Vector2(720, 1280)
 	floor_y = vp.y - 160.0
 
 	GameManager.start_game()
