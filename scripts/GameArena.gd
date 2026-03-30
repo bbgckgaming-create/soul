@@ -2,12 +2,18 @@
 ## Root scene script — builds the entire game world programmatically.
 extends Node2D
 
+class_name GameArena
+
 # ─── Child References ────────────────────────────────────────────────────────
 var player:    Player   = null
 var enemy:     Enemy    = null
-var hud:       HUD      = null
-var joystick:  VirtualJoystick = null
+var hud = null
+var joystick = null
 var ui_layer:  CanvasLayer     = null
+
+# ✅ CORRECT CODE: Load scenes as resources (not as classes)
+var hud_scene = load("res://scenes/HUD.tscn")
+var virtual_joystick_scene = load("res://scenes/VirtualJoystick.tscn")
 
 # Arena geometry
 var vp:        Vector2  = Vector2.ZERO
@@ -168,7 +174,7 @@ func _build_ui() -> void:
 	add_child(ui_layer)
 
 	# HUD
-	hud = HUD.new()
+	hud = hud_scene.instantiate()
 	ui_layer.add_child(hud)
 
 	# Controls panel
@@ -177,7 +183,7 @@ func _build_ui() -> void:
 	ui_layer.add_child(ctrl_panel)
 
 	# Virtual Joystick (bottom-left)
-	joystick = VirtualJoystick.new()
+	joystick = virtual_joystick_scene.instantiate()
 	joystick.name     = "Joystick"
 	joystick.position = Vector2(20.0, vp.y - 220.0)
 	joystick.size     = Vector2(180.0, 180.0)
