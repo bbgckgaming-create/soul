@@ -35,7 +35,7 @@ func _ready() -> void:
 	vp      = get_viewport().get_visible_rect().size
 	if vp == Vector2.ZERO:
 		vp = Vector2(720, 1280)
-	floor_y = vp.y - 300.0
+	floor_y = vp.y * 0.62
 
 	GameManager.start_game()
 
@@ -139,6 +139,13 @@ func _create_fighter(is_player: bool):
 	sprite.position = Vector2(-Fighter.CHAR_W * 0.5, -Fighter.CHAR_H)
 	sprite.color    = Color(0.2, 0.55, 1.0) if is_player else Color(0.85, 0.15, 0.15)
 	fighter.add_child(sprite)
+
+	# Limb (attack visual — hidden until attack fires)
+	var limb := ColorRect.new()
+	limb.name    = "Limb"
+	limb.visible = false
+	limb.size    = Vector2(60.0, 22.0)
+	fighter.add_child(limb)
 
 	# Hurtbox (receives incoming hits)
 	var hurtbox := Area2D.new()
