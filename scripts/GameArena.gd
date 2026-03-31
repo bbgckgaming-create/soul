@@ -116,6 +116,9 @@ func _build_fighters() -> void:
 	player = _create_fighter(true)
 	enemy  = _create_fighter(false)
 	enemy.set_target(player)
+	# Give each fighter a reference to their opponent for facing logic
+	player.opponent = enemy
+	enemy.opponent  = player
 
 func _create_fighter(is_player: bool):
 	var fighter
@@ -132,20 +135,88 @@ func _create_fighter(is_player: bool):
 	body_col.position = Vector2(0.0, -Fighter.CHAR_H * 0.5)
 	fighter.add_child(body_col)
 
-	# Sprite (colored rectangle)
-	var sprite := ColorRect.new()
-	sprite.name     = "Sprite"
-	sprite.size     = Vector2(Fighter.CHAR_W, Fighter.CHAR_H)
-	sprite.position = Vector2(-Fighter.CHAR_W * 0.5, -Fighter.CHAR_H)
-	sprite.color    = Color(0.2, 0.55, 1.0) if is_player else Color(0.85, 0.15, 0.15)
-	fighter.add_child(sprite)
+	# ── Visual body layers — z_index controls draw depth ─────────────────────
+	# Draw order:
+	#   0  BLegU / BLegL  — back leg segments (behind everything)
+	#   1  BArmU / BArmL  — back arm segments
+	#   2  Torso
+	#   3  Belt
+	#   4  FLegU / FLegL  — front leg segments
+	#   5  Head
+	#   6  Hair
+	#   7  Eye
+	#   8  Pupil
+	#   9  FArmU / FArmL  — front arm segments (on top of everything)
 
-	# Limb (attack visual — hidden until attack fires)
-	var limb := ColorRect.new()
-	limb.name    = "Limb"
-	limb.visible = false
-	limb.size    = Vector2(60.0, 22.0)
-	fighter.add_child(limb)
+	var b_leg_u := ColorRect.new()
+	b_leg_u.name    = "BLegU"
+	b_leg_u.z_index = 0
+	fighter.add_child(b_leg_u)
+
+	var b_leg_l := ColorRect.new()
+	b_leg_l.name    = "BLegL"
+	b_leg_l.z_index = 0
+	fighter.add_child(b_leg_l)
+
+	var b_arm_u := ColorRect.new()
+	b_arm_u.name    = "BArmU"
+	b_arm_u.z_index = 1
+	fighter.add_child(b_arm_u)
+
+	var b_arm_l := ColorRect.new()
+	b_arm_l.name    = "BArmL"
+	b_arm_l.z_index = 1
+	fighter.add_child(b_arm_l)
+
+	var torso := ColorRect.new()
+	torso.name    = "Torso"
+	torso.z_index = 2
+	fighter.add_child(torso)
+
+	var belt := ColorRect.new()
+	belt.name    = "Belt"
+	belt.z_index = 3
+	fighter.add_child(belt)
+
+	var f_leg_u := ColorRect.new()
+	f_leg_u.name    = "FLegU"
+	f_leg_u.z_index = 4
+	fighter.add_child(f_leg_u)
+
+	var f_leg_l := ColorRect.new()
+	f_leg_l.name    = "FLegL"
+	f_leg_l.z_index = 4
+	fighter.add_child(f_leg_l)
+
+	var head := ColorRect.new()
+	head.name    = "Head"
+	head.z_index = 5
+	fighter.add_child(head)
+
+	var hair := ColorRect.new()
+	hair.name    = "Hair"
+	hair.z_index = 6
+	fighter.add_child(hair)
+
+	var eye := ColorRect.new()
+	eye.name    = "Eye"
+	eye.z_index = 7
+	fighter.add_child(eye)
+
+	var pupil := ColorRect.new()
+	pupil.name    = "Pupil"
+	pupil.z_index = 8
+	fighter.add_child(pupil)
+
+	var f_arm_u := ColorRect.new()
+	f_arm_u.name    = "FArmU"
+	f_arm_u.z_index = 9
+	fighter.add_child(f_arm_u)
+
+	var f_arm_l := ColorRect.new()
+	f_arm_l.name    = "FArmL"
+	f_arm_l.z_index = 9
+	fighter.add_child(f_arm_l)
 
 	# Hurtbox (receives incoming hits)
 	var hurtbox := Area2D.new()
