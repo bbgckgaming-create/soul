@@ -27,6 +27,10 @@ var btn_special: Button = null
 # Restart state
 var game_over_pending: bool = false
 
+# Debug click detection
+var debug_label: Label = null
+var debug_timer: float = 0.0
+
 # ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	# Wait one frame so the viewport is fully initialized before reading its size
@@ -51,8 +55,66 @@ func _ready() -> void:
 	GameManager.game_over.connect(_on_game_over)
 
 	_start_round()
+	_setup_debug_display()
 
-# ─── Background ──────────────────────────────────────────────────────────────
+# ─── Debug Display Setup ──────────────────────────────────────────────────────
+func _setup_debug_display() -> void:
+	debug_label = Label.new()
+	debug_label.position = Vector2(20.0, 20.0)
+	debug_label.add_theme_font_size_override("font_size", 24)
+	debug_label.add_theme_color_override("font_color", Color.WHITE)
+	ui_layer.add_child(debug_label)
+
+# ─── Input Handling (Debug Click Detection) ───────────────────────────────────
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var mouse_pos: Vector2 = get_local_mouse_position()
+		var clicked_part: String = _get_clicked_body_part(mouse_pos)
+		if clicked_part:
+			if debug_label:
+				debug_label.text = "Clicked: %s" % clicked_part
+				debug_timer = 2.0
+
+# ─── Helper: Detect which body part was clicked ────────────────────────────────
+func _get_clicked_body_part(pos: Vector2) -> String:
+	# Check player parts
+	for part_name in ["Head", "Hair", "Eye", "Pupil", "Torso", "Belt", "FArmU", "FArmL", "BArmU", "BArmL", "FLegU", "FLegL", "BLegU", "BLegL"]:
+		var part = player.get_node_or_null(part_name)
+		if part and part is ColorRect and _point_in_rect(pos, part, player.position):
+			return "Player - %s" % part_name
+
+	# Check enemy parts
+	for part_name in ["Head", "Hair", "Eye", "Pupil", "Torso", "Belt", "FArmU", "FArmL", "BArmU", "BArmL", "FLegU", "FLegL", "BLegU", "BLegL"]:
+		var part = enemy.get_node_or_null(part_name)
+		if part and part is ColorRect and _point_in_rect(pos, part, enemy.position):
+			return "Enemy - %s" % part_name
+
+	return ""
+
+# ─── Helper: Check if point is inside ColorRect (accounting for transforms) ────
+func _point_in_rect(point: Vector2, rect: ColorRect, fighter_pos: Vector2) -> bool:
+	var rect_global_pos: Vector2 = fighter_pos + rect.position
+	var rect_size: Vector2 = rect.size
+	var rect_pivot: Vector2 = rect.pivot_offset
+	
+	# Account for rotation and pivot
+	var local_point: Vector2 = point - rect_global_pos
+	if rect.rotation != 0.0:
+		local_point = local_point.rotated(-rect.rotation)
+	
+	local_point += rect_pivot
+	
+	return (local_point.x >= 0 and local_point.x < rect_size.x and 
+			local_point.y >= 0 and local_point.y < rect_size.y)
+
+# ─── Update Debug Display ──────────────────────────────────────────────────────
+func _process(delta: float) -> void:
+	if debug_timer > 0.0:
+		debug_timer -= delta
+		if debug_timer <= 0.0 and debug_label:
+			debug_label.text = ""
+
+# ─── Round Management ─────────────────────────────────────────────────────────
 func _build_background() -> void:
 	var sky_top := ColorRect.new()
 	sky_top.color    = Color(0.04, 0.04, 0.08)

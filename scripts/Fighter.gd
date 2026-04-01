@@ -283,12 +283,14 @@ func _update_visual() -> void:
 	# Back forearm is hidden (see placement section below).
 	# Legs: both thighs lean toward the opponent; lower leg follows at a slightly
 	# smaller angle for a gentle natural knee bend (no S-curve).
-	# Guard stance — angles match user sketch:
-	# Front arm: upper arm pushes forward ~52°, forearm droops forward-down ~32°.
-	# Small angle difference (20°) means the two rects meet cleanly; an elbow-cap
-	# square (arm_bl_node, repurposed) fills any remaining corner gap.
-	var ua_f: float =  0.90   # front upper arm  — 52° forward from vertical
-	var la_f: float =  0.55   # front lower arm  — 32° forward, forearm angles down
+	# Guard stance:
+	# ua_f = 0.90 → upper arm 52° forward (elbow pokes toward opponent)
+	# Raised-elbow guard (inverted):
+	#   ua_f = 2.40 → upper arm goes UP and forward from shoulder — elbow sits above/forward
+	#   la_f = 1.20 → forearm extends forward-down from that raised elbow, fist leads out
+	# Elbow cap covers the corner gap at the joint.
+	var ua_f: float =  2.40   # front upper arm  — rises up-forward, elbow above shoulder
+	var la_f: float =  1.20   # front lower arm  — extends forward from raised elbow
 	var ua_b: float = -0.18   # back  upper arm  — slightly behind torso
 	var la_b: float =  0.00   # back  lower arm  — repurposed as elbow cap; value unused
 	# Legs — from the sketch: front thigh sweeps forward, shin nearly vertical
@@ -303,25 +305,26 @@ func _update_visual() -> void:
 	# ── Attack animations ──────────────────────────────────────────────────────
 	match current_state:
 		State.PUNCH:
-			# Guard → horizontal jab.
-			# ua_f: 1.10 → 1.57 (+0.47), la_f: 0.68 → 1.57 (+0.89)
-			ua_f      += ef * 0.47    # upper arm drives to horizontal
-			la_f      += ef * 0.89    # forearm straightens to match
-			ua_b      -= ef * 0.20    # back arm pulls back (weight transfer)
-			torso_rot  = ef * 0.24    # body commits hard into the punch
+			# Raised-elbow guard → full horizontal jab.
+			# ua_f: 2.40 → 1.57 (-0.83) — elbow drops from raised to horizontal.
+			# la_f: 1.20 → 1.57 (+0.37) — forearm extends forward to meet horizontal.
+			ua_f      -= ef * 0.83    # elbow drops and drives forward
+			la_f      += ef * 0.37    # forearm extends to horizontal
+			ua_b      -= ef * 0.20   # back arm pulls back (weight transfer)
+			torso_rot  = ef * 0.24   # body commits hard into the punch
 
 		State.KICK:
 			# Both leg segments swing upward together until near-horizontal = high kick.
 			ul_f      += ef * 1.35    # thigh: 0.22 → 1.57 (horizontal)
 			ll_f      += ef * 1.45    # shin:  0.12 → 1.57 (leg fully extended)
 			ua_f      -= ef * 0.15    # front arm drops slightly for balance
-			la_f      -= ef * 0.12    # forearm opens slightly with the lean
+			la_f      -= ef * 0.10    # forearm opens slightly with the lean
 			torso_rot  = -(ef * 0.20) # body rocks back on the kick
 
 		State.SPECIAL:
-			# Front arm unfolds to jab; back upper arm sweeps forward for surge.
-			ua_f      += ef * 0.47    # front upper arm drives to horizontal
-			la_f      += ef * 0.89    # front forearm straightens to match
+			# Arms extend; back upper arm sweeps forward for surge.
+			ua_f      -= ef * 0.83    # elbow drops from raised to horizontal
+			la_f      += ef * 0.37    # forearm extends to horizontal
 			ua_b      += ef * 1.55    # back upper arm sweeps from behind → front
 			torso_rot  = ef * 0.15
 			col_hi     = Color(0.90, 0.40, 1.00, 0.95)  # purple energy glow
@@ -379,11 +382,9 @@ func _update_visual() -> void:
 	var bknee: Vector2 = _place_segment(leg_bu_node, hip_bx, y_hip, dir * ul_b, ul_len, LW)
 	_place_segment(leg_bl_node, bknee.x, bknee.y, dir * ll_b, ll_len, LW)
 
-	# ── Back arm — upper segment only; forearm hidden for cleaner silhouette ────
+	# ── Back arm — upper segment only; BArmL is repurposed as front elbow cap ──
 	if arm_bu_node:
 		arm_bu_node.color = col_dark
-	if arm_bl_node:
-		arm_bl_node.size = Vector2.ZERO   # forearm hidden intentionally
 	_place_segment(arm_bu_node, shl_bx, y_shl, dir * ua_b, ua_len, AW)
 
 	# ── Front leg ─────────────────────────────────────────────────────────────
@@ -395,16 +396,26 @@ func _update_visual() -> void:
 	_place_segment(leg_fl_node, fknee.x, fknee.y, dir * ll_f, ll_len, LW)
 
 	# ── Front arm (topmost layer) ──────────────────────────────────────────────
+	const FAW: float = 15.0   # front arm width — slimmed down for a cleaner look
 	if arm_fu_node:
 		arm_fu_node.color = col_hi
 	if arm_fl_node:
 		arm_fl_node.color = col_hi
-	var felbow: Vector2 = _place_segment(arm_fu_node, shl_fx, y_shl, dir * ua_f, ua_len, AW)
-	# Small overlap to ensure the two segments always meet flush at the elbow.
-	var arm_overlap: float = 4.0
+	var felbow: Vector2 = _place_segment(arm_fu_node, shl_fx, y_shl, dir * ua_f, ua_len, FAW)
+	# Overlap the forearm start slightly back along the upper arm to close the joint.
+	var arm_overlap: float = 8.0
 	var elbow_ox: float = sin(dir * ua_f) * arm_overlap
 	var elbow_oy: float = cos(dir * ua_f) * arm_overlap
-	_place_segment(arm_fl_node, felbow.x - elbow_ox, felbow.y - elbow_oy, dir * la_f, la_len + arm_overlap, AW)
+	_place_segment(arm_fl_node, felbow.x - elbow_ox, felbow.y - elbow_oy, dir * la_f, la_len + arm_overlap, FAW)
+	# Elbow cap square (repurposed BArmL node) — sits at the joint on the top layer
+	# and fills any remaining corner gap between the two arm rectangles.
+	if arm_bl_node:
+		arm_bl_node.z_index = 9
+		arm_bl_node.color   = col_hi
+		arm_bl_node.size         = Vector2(FAW + 6.0, FAW + 6.0)
+		arm_bl_node.pivot_offset = Vector2((FAW + 6.0) * 0.5, (FAW + 6.0) * 0.5)
+		arm_bl_node.position     = Vector2(felbow.x - (FAW + 6.0) * 0.5, felbow.y - (FAW + 6.0) * 0.5)
+		arm_bl_node.rotation     = 0.0
 
 func _report_to_manager() -> void:
 	GameManager.report_health(fighter_id, health, MAX_HEALTH)
@@ -418,7 +429,7 @@ func do_punch() -> void:
 	attack_timer    = 0.0
 	can_attack      = false
 	hit_landed      = false
-	_position_hitbox(Vector2(CHAR_W * 0.5 + 35.0, -CHAR_H * 0.38), Vector2(70.0, 50.0))
+	_position_hitbox(Vector2(CHAR_W * 0.5 + 30.0, -CHAR_H * 0.75), Vector2(75.0, 80.0))
 
 func do_kick() -> void:
 	if not _can_start_attack(): return
@@ -481,3 +492,4 @@ func _die() -> void:
 	velocity      = Vector2.ZERO
 	died.emit()
 	GameManager.end_round(1 - fighter_id)
+                                                                                     
